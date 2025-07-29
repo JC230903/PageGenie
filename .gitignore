@@ -78,3 +78,6 @@ replit.nix
 # Local development
 .pythonlibs/
 uv.lock
+
+# Google App Engine generated folder
+appengine-generated/
