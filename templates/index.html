@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-Enhanced PDF Reader</title>
+    <link href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .upload-area {
+            border: 2px dashed var(--bs-border-color);
+            border-radius: 0.5rem;
+            padding: 3rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            background: var(--bs-body-bg);
+        }
+        .upload-area:hover {
+            border-color: var(--bs-primary);
+            background: var(--bs-gray-900);
+        }
+        .upload-area.dragover {
+            border-color: var(--bs-success);
+            background: rgba(var(--bs-success-rgb), 0.1);
+        }
+        .hero-section {
+            background: linear-gradient(135deg, var(--bs-dark) 0%, var(--bs-gray-900) 100%);
+            padding: 4rem 0;
+        }
+        .feature-card {
+            background: var(--bs-gray-900);
+            border: 1px solid var(--bs-border-color);
+            border-radius: 0.5rem;
+            padding: 2rem;
+            height: 100%;
+            transition: transform 0.3s ease;
+        }
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+        .feature-icon {
+            font-size: 2.5rem;
+            color: var(--bs-primary);
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('index') }}">
+                <i class="fas fa-book-open me-2"></i>
+                AI-Enhanced PDF Reader
+            </a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6">
+                    <h1 class="display-4 fw-bold mb-4">
+                        Transform Your PDFs into 
+                        <span class="text-primary">Immersive Digital Books</span>
+                    </h1>
+                    <p class="lead mb-4">
+                        Upload any PDF document and watch as AI analyzes the content to generate thematic marginalia, 
+                        creating a rich, illustrated reading experience with medieval manuscript-style decorations.
+                    </p>
+                    <div class="d-flex gap-3 mb-4">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-robot text-primary me-2"></i>
+                            <small>AI-Powered Analysis</small>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-palette text-primary me-2"></i>
+                            <small>Generated Artwork</small>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-book text-primary me-2"></i>
+                            <small>Interactive Reading</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="text-center">
+                        <i class="fas fa-file-pdf" style="font-size: 8rem; color: var(--bs-primary); opacity: 0.7;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Upload Section -->
+    <section class="py-5">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <div class="card">
+                        <div class="card-body">
+                            <h2 class="card-title text-center mb-4">
+                                <i class="fas fa-upload me-2"></i>
+                                Upload Your PDF
+                            </h2>
+                            
+                            {% with messages = get_flashed_messages() %}
+                                {% if messages %}
+                                    {% for message in messages %}
+                                        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                                            {{ message }}
+                                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                        </div>
+                                    {% endfor %}
+                                {% endif %}
+                            {% endwith %}
+
+                            <form action="{{ url_for('upload_pdf') }}" method="post" enctype="multipart/form-data" id="uploadForm">
+                                <div class="upload-area" id="uploadArea">
+                                    <i class="fas fa-cloud-upload-alt fa-3x mb-3 text-muted"></i>
+                                    <h4>Drop your PDF here or click to browse</h4>
+                                    <p class="text-muted mb-3">Supports PDF files up to 16MB</p>
+                                    <input type="file" name="pdf_file" id="pdfFile" accept=".pdf" class="d-none" required>
+                                    <button type="button" class="btn btn-outline-primary" onclick="document.getElementById('pdfFile').click()">
+                                        <i class="fas fa-folder-open me-2"></i>
+                                        Choose File
+                                    </button>
+                                </div>
+                                
+                                <div id="fileInfo" class="mt-3 d-none">
+                                    <div class="alert alert-info">
+                                        <i class="fas fa-file-pdf me-2"></i>
+                                        <span id="fileName"></span>
+                                        <span id="fileSize" class="text-muted ms-2"></span>
+                                    </div>
+                                </div>
+
+                                <div class="text-center mt-4">
+                                    <button type="submit" class="btn btn-primary btn-lg" id="uploadBtn" disabled>
+                                        <i class="fas fa-magic me-2"></i>
+                                        Transform PDF into Digital Book
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="py-5 bg-dark">
+        <div class="container">
+            <h2 class="text-center mb-5">How It Works</h2>
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="feature-card text-center">
+                        <div class="feature-icon">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        <h4>AI Content Analysis</h4>
+                        <p class="text-muted">
+                            Advanced natural language processing analyzes your PDF to identify genre, themes, 
+                            and emotional tone of the content.
+                        </p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-card text-center">
+                        <div class="feature-icon">
+                            <i class="fas fa-paint-brush"></i>
+                        </div>
+                        <h4>Thematic Artwork</h4>
+                        <p class="text-muted">
+                            AI generates beautiful marginalia artwork that matches your document's themes, 
+                            creating an illuminated manuscript experience.
+                        </p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-card text-center">
+                        <div class="feature-icon">
+                            <i class="fas fa-book-reader"></i>
+                        </div>
+                        <h4>Immersive Reading</h4>
+                        <p class="text-muted">
+                            Experience your content in a beautiful book-style interface with page-turning 
+                            animations and strategically placed decorative elements.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-dark py-4 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <p class="mb-0">&copy; 2024 AI-Enhanced PDF Reader. Transforming documents into art.</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p class="mb-0">
+                        <i class="fas fa-robot me-1"></i>
+                        Powered by AI
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // File upload handling
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('pdfFile');
+        const fileInfo = document.getElementById('fileInfo');
+        const fileName = document.getElementById('fileName');
+        const fileSize = document.getElementById('fileSize');
+        const uploadBtn = document.getElementById('uploadBtn');
+
+        // Click to upload
+        uploadArea.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        // Drag and drop functionality
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0 && files[0].type === 'application/pdf') {
+                fileInput.files = files;
+                handleFileSelect();
+            }
+        });
+
+        // File selection handler
+        fileInput.addEventListener('change', handleFileSelect);
+
+        function handleFileSelect() {
+            const file = fileInput.files[0];
+            if (file) {
+                if (file.type !== 'application/pdf') {
+                    alert('Please select a PDF file.');
+                    fileInput.value = '';
+                    return;
+                }
+
+                fileName.textContent = file.name;
+                fileSize.textContent = `(${(file.size / 1024 / 1024).toFixed(2)} MB)`;
+                fileInfo.classList.remove('d-none');
+                uploadBtn.disabled = false;
+            } else {
+                fileInfo.classList.add('d-none');
+                uploadBtn.disabled = true;
+            }
+        }
+
+        // Form submission with loading state
+        document.getElementById('uploadForm').addEventListener('submit', function(e) {
+            uploadBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
+            uploadBtn.disabled = true;
+        });
+    </script>
+</body>
+</html>

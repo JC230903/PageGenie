@@ -1,0 +1,339 @@
+/* Book-style CSS for immersive reading experience */
+
+.book-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.book-header {
+    background: linear-gradient(135deg, var(--bs-dark) 0%, var(--bs-gray-900) 100%);
+    border-radius: 0.5rem;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    border: 1px solid var(--bs-border-color);
+}
+
+.book-title {
+    font-family: 'Georgia', serif;
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: var(--bs-body-color);
+    margin-bottom: 1rem;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.book-meta {
+    margin-bottom: 0.5rem;
+}
+
+.book-themes .badge {
+    background-color: var(--bs-gray-700) !important;
+    color: var(--bs-body-color);
+    border: 1px solid var(--bs-border-color);
+}
+
+.book-controls {
+    background: var(--bs-gray-900);
+    border-radius: 0.5rem;
+    padding: 1rem;
+    border: 1px solid var(--bs-border-color);
+}
+
+.book-viewer {
+    perspective: 1500px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 600px;
+    background: radial-gradient(ellipse at center, var(--bs-gray-800) 0%, var(--bs-dark) 100%);
+    border-radius: 1rem;
+    padding: 2rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.book-spine {
+    position: absolute;
+    left: 50%;
+    top: 50px;
+    bottom: 50px;
+    width: 8px;
+    background: linear-gradient(to bottom, 
+        var(--bs-gray-600) 0%, 
+        var(--bs-gray-700) 50%, 
+        var(--bs-gray-600) 100%);
+    border-radius: 4px;
+    transform: translateX(-50%);
+    box-shadow: 
+        -2px 0 4px rgba(0,0,0,0.3),
+        2px 0 4px rgba(0,0,0,0.3);
+    z-index: 10;
+}
+
+.book-pages {
+    display: flex;
+    position: relative;
+    transform-style: preserve-3d;
+}
+
+.page {
+    width: 400px;
+    height: 550px;
+    background: linear-gradient(135deg, #fafafa 0%, #f0f0f0 100%);
+    border: 1px solid #ddd;
+    border-radius: 0.5rem;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 0.6s ease;
+    box-shadow: 
+        0 5px 15px rgba(0,0,0,0.2),
+        inset 0 1px 0 rgba(255,255,255,0.5);
+}
+
+.left-page {
+    margin-right: -8px;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    transform-origin: right center;
+    z-index: 2;
+}
+
+.right-page {
+    margin-left: -8px;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    transform-origin: left center;
+    z-index: 2;
+}
+
+.page-content {
+    padding: 40px 30px;
+    height: 100%;
+    position: relative;
+    color: #333;
+    font-family: 'Georgia', serif;
+    line-height: 1.6;
+    overflow: hidden;
+}
+
+.page-number {
+    position: absolute;
+    bottom: 20px;
+    font-size: 0.9rem;
+    color: #666;
+    font-family: 'Arial', sans-serif;
+}
+
+.left-page .page-number {
+    left: 30px;
+}
+
+.right-page .page-number {
+    right: 30px;
+}
+
+.page-text {
+    height: calc(100% - 60px);
+    overflow: hidden;
+    font-size: 0.95rem;
+    text-align: justify;
+    hyphens: auto;
+    word-wrap: break-word;
+}
+
+.page-text p {
+    margin-bottom: 1rem;
+    text-indent: 1.5em;
+}
+
+.page-text p:first-child {
+    text-indent: 0;
+}
+
+.marginalia-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    z-index: 5;
+}
+
+.marginalia-item {
+    position: absolute;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    filter: sepia(20%) hue-rotate(15deg) saturate(0.8);
+}
+
+.marginalia-item.visible {
+    opacity: 0.8;
+}
+
+.marginalia-item:hover {
+    opacity: 1;
+    transform: scale(1.1);
+    transition: all 0.3s ease;
+}
+
+/* Page turning animations */
+.page.turning-left {
+    transform: rotateY(-180deg);
+    z-index: 1;
+}
+
+.page.turning-right {
+    transform: rotateY(180deg);
+    z-index: 1;
+}
+
+/* Book shadows and depth */
+.page::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        to right,
+        rgba(0,0,0,0.1) 0%,
+        rgba(0,0,0,0.03) 10%,
+        rgba(0,0,0,0) 20%
+    );
+    pointer-events: none;
+    border-radius: inherit;
+}
+
+.right-page::before {
+    background: linear-gradient(
+        to left,
+        rgba(0,0,0,0.1) 0%,
+        rgba(0,0,0,0.03) 10%,
+        rgba(0,0,0,0) 20%
+    );
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .book-viewer {
+        padding: 1rem;
+        min-height: 500px;
+    }
+
+    .page {
+        width: 300px;
+        height: 400px;
+    }
+
+    .page-content {
+        padding: 25px 20px;
+    }
+
+    .book-title {
+        font-size: 2rem;
+    }
+
+    .book-pages {
+        flex-direction: column;
+    }
+
+    .left-page,
+    .right-page {
+        margin: 0;
+        border-radius: 0.5rem;
+    }
+
+    .left-page {
+        margin-bottom: 1rem;
+    }
+
+    .book-spine {
+        display: none;
+    }
+}
+
+/* Loading states */
+.page.loading {
+    opacity: 0.5;
+}
+
+.page.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 30px;
+    height: 30px;
+    border: 3px solid #ddd;
+    border-top: 3px solid var(--bs-primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    transform: translate(-50%, -50%);
+}
+
+@keyframes spin {
+    0% { transform: translate(-50%, -50%) rotate(0deg); }
+    100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* Theme variations */
+.page.fantasy-theme {
+    background: linear-gradient(135deg, #fdf6e3 0%, #f5f0e1 100%);
+}
+
+.page.scifi-theme {
+    background: linear-gradient(135deg, #f0f4f8 0%, #e8f0fe 100%);
+}
+
+.page.mystery-theme {
+    background: linear-gradient(135deg, #f8f8f8 0%, #eeeeee 100%);
+}
+
+/* Marginalia styling */
+.marginalia-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+/* Interactive elements */
+.page-text::selection {
+    background: rgba(var(--bs-primary-rgb), 0.2);
+}
+
+.book-controls button:hover {
+    transform: translateY(-2px);
+    transition: transform 0.2s ease;
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+    .page,
+    .marginalia-item,
+    .book-controls button {
+        transition: none;
+    }
+    
+    .page.turning-left,
+    .page.turning-right {
+        transform: none;
+    }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+    .page {
+        background: white;
+        border: 2px solid black;
+        color: black;
+    }
+    
+    .marginalia-item {
+        filter: contrast(1.2);
+    }
+}

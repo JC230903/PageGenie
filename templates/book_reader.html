@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% if book_data %}{{ book_data.title }}{% else %}Processing PDF{% endif %} - AI-Enhanced PDF Reader</title>
+    <link href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/book-style.css') }}" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('index') }}">
+                <i class="fas fa-book-open me-2"></i>
+                AI-Enhanced PDF Reader
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="{{ url_for('index') }}">
+                    <i class="fas fa-upload me-1"></i>
+                    Upload New PDF
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        {% if job.status.value != 'completed' %}
+            <!-- Processing Status -->
+            <div class="row justify-content-center mt-5">
+                <div class="col-lg-8">
+                    <div class="card">
+                        <div class="card-body text-center">
+                            <h2 class="card-title mb-4">
+                                <i class="fas fa-cogs me-2"></i>
+                                Processing Your PDF
+                            </h2>
+                            
+                            <div class="mb-4">
+                                <div class="progress mb-3" style="height: 20px;">
+                                    <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                                         role="progressbar" 
+                                         style="width: {{ job.progress }}%"
+                                         id="progressBar">
+                                        {{ job.progress }}%
+                                    </div>
+                                </div>
+                                
+                                <div id="statusMessage" class="text-muted">
+                                    {% if job.status.value == 'pending' %}
+                                        <i class="fas fa-clock me-2"></i>
+                                        Preparing to process your PDF...
+                                    {% elif job.status.value == 'processing' %}
+                                        <i class="fas fa-spinner fa-spin me-2"></i>
+                                        Analyzing content and generating artwork...
+                                    {% elif job.status.value == 'failed' %}
+                                        <i class="fas fa-exclamation-triangle me-2 text-warning"></i>
+                                        Processing failed: {{ job.error_message }}
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mt-4">
+                                <div class="col-md-4">
+                                    <div class="card bg-secondary">
+                                        <div class="card-body text-center">
+                                            <i class="fas fa-file-alt fa-2x mb-2"></i>
+                                            <h6>Text Extraction</h6>
+                                            <small class="text-muted">Analyzing PDF structure</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card bg-secondary">
+                                        <div class="card-body text-center">
+                                            <i class="fas fa-brain fa-2x mb-2"></i>
+                                            <h6>AI Analysis</h6>
+                                            <small class="text-muted">Understanding themes & mood</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card bg-secondary">
+                                        <div class="card-body text-center">
+                                            <i class="fas fa-palette fa-2x mb-2"></i>
+                                            <h6>Artwork Generation</h6>
+                                            <small class="text-muted">Creating marginalia</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {% if job.status.value == 'failed' %}
+                                <div class="mt-4">
+                                    <a href="{{ url_for('index') }}" class="btn btn-primary">
+                                        <i class="fas fa-arrow-left me-2"></i>
+                                        Try Another PDF
+                                    </a>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <script>
+                // Poll for job status updates
+                const jobId = {{ job.id }};
+                
+                function updateStatus() {
+                    fetch(`/job_status/${jobId}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            const progressBar = document.getElementById('progressBar');
+                            const statusMessage = document.getElementById('statusMessage');
+                            
+                            progressBar.style.width = data.progress + '%';
+                            progressBar.textContent = data.progress + '%';
+                            
+                            if (data.status === 'completed') {
+                                statusMessage.innerHTML = '<i class="fas fa-check-circle me-2 text-success"></i>Processing complete! Redirecting...';
+                                setTimeout(() => {
+                                    window.location.reload();
+                                }, 2000);
+                            } else if (data.status === 'failed') {
+                                statusMessage.innerHTML = `<i class="fas fa-exclamation-triangle me-2 text-warning"></i>Processing failed: ${data.error_message}`;
+                            } else if (data.status === 'processing') {
+                                statusMessage.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Analyzing content and generating artwork...';
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error fetching status:', error);
+                        });
+                }
+                
+                // Poll every 3 seconds if not completed or failed
+                {% if job.status.value not in ['completed', 'failed'] %}
+                    const statusInterval = setInterval(() => {
+                        updateStatus();
+                    }, 3000);
+                {% endif %}
+            </script>
+
+        {% else %}
+            <!-- Book Reader Interface -->
+            <div class="book-container mt-4">
+                <!-- Book Header -->
+                <div class="book-header text-center mb-4">
+                    <h1 class="book-title">{{ book_data.title }}</h1>
+                    <div class="book-meta">
+                        <span class="badge bg-primary me-2">{{ book_data.genre }}</span>
+                        <span class="badge bg-secondary me-2">{{ book_data.overall_mood|title }} Mood</span>
+                        <span class="text-muted">{{ book_data.total_pages }} pages</span>
+                    </div>
+                    {% if book_data.themes %}
+                        <div class="book-themes mt-2">
+                            <small class="text-muted me-2">Themes:</small>
+                            {% for theme in book_data.themes %}
+                                <span class="badge bg-outline-secondary me-1">{{ theme }}</span>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Book Controls -->
+                <div class="book-controls text-center mb-4">
+                    <button id="prevBtn" class="btn btn-outline-primary me-2" disabled>
+                        <i class="fas fa-chevron-left"></i> Previous
+                    </button>
+                    <span id="pageInfo" class="mx-3">Page 1 of {{ book_data.total_pages }}</span>
+                    <button id="nextBtn" class="btn btn-outline-primary ms-2">
+                        Next <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+
+                <!-- Book Display -->
+                <div class="book-viewer" id="bookViewer">
+                    <div class="book-spine"></div>
+                    <div class="book-pages">
+                        <!-- Left page -->
+                        <div class="page left-page" id="leftPage">
+                            <div class="page-content" id="leftPageContent">
+                                <div class="page-number" id="leftPageNumber"></div>
+                                <div class="page-text" id="leftPageText"></div>
+                                <div class="marginalia-container" id="leftMarginalia"></div>
+                            </div>
+                        </div>
+                        
+                        <!-- Right page -->
+                        <div class="page right-page" id="rightPage">
+                            <div class="page-content" id="rightPageContent">
+                                <div class="page-number" id="rightPageNumber"></div>
+                                <div class="page-text" id="rightPageText"></div>
+                                <div class="marginalia-container" id="rightMarginalia"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Loading indicator -->
+                <div id="loadingIndicator" class="text-center mt-4 d-none">
+                    <i class="fas fa-spinner fa-spin me-2"></i>
+                    Loading pages...
+                </div>
+            </div>
+
+            <!-- Book data for JavaScript -->
+            <script type="application/json" id="bookData">
+                {{ book_data | tojson | safe }}
+            </script>
+
+            <!-- PDF.js and Book Reader Scripts -->
+            <script src="{{ url_for('static', filename='js/pdf-renderer.js') }}"></script>
+            <script src="{{ url_for('static', filename='js/book-reader.js') }}"></script>
+        {% endif %}
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
